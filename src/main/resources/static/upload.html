@@ -62,29 +62,6 @@
         padding: 24px;
       }
 
-      .modes {
-        display: flex;
-        gap: 8px;
-        margin-bottom: 20px;
-      }
-
-      .modes button {
-        flex: 1;
-        padding: 11px;
-        border: 1px solid #475569;
-        border-radius: 10px;
-        background: transparent;
-        color: #94a3b8;
-        cursor: pointer;
-        font-weight: 600;
-      }
-
-      .modes button.active {
-        background: #3730a3;
-        border-color: #6366f1;
-        color: white;
-      }
-
       .field {
         margin-bottom: 18px;
       }
@@ -102,10 +79,6 @@
         border: 1px solid #475569;
         border-radius: 9px;
         color: white;
-      }
-
-      .hidden {
-        display: none;
       }
 
       .dropzone {
@@ -128,6 +101,7 @@
         font-size: 32px;
         margin-bottom: 10px;
       }
+
       .dropzone strong {
         display: block;
         margin-bottom: 7px;
@@ -180,6 +154,7 @@
       .success {
         color: #4ade80;
       }
+
       .error {
         color: #f87171;
       }
@@ -240,16 +215,11 @@
       <header>
         <div class="logo">📷</div>
         <h1>Upload photos</h1>
-        <p class="muted">Upload multiple images · Maximum 100 MB per image</p>
+        <p class="muted">Upload multiple images · Maximum 5 MB per image</p>
       </header>
 
       <section class="card">
-        <div class="modes">
-          <button type="button" id="managerMode" class="active">Manager</button>
-          <button type="button" id="userMode">User</button>
-        </div>
-
-        <div class="field hidden" id="tokenField">
+        <div class="field">
           <label for="token">JWT access token</label>
           <input
             id="token"
@@ -286,29 +256,13 @@
       const uploadButton = document.getElementById("uploadButton");
       const summary = document.getElementById("summary");
       const tokenInput = document.getElementById("token");
-      const tokenField = document.getElementById("tokenField");
-      const managerMode = document.getElementById("managerMode");
-      const userMode = document.getElementById("userMode");
       const dropzone = document.getElementById("dropzone");
 
-      const MAX_SIZE = 100 * 1024 * 1024;
+      const MAX_SIZE = 5 * 1024 * 1024;
 
-      let mode = "manager";
       let files = [];
       let uploading = false;
       let nextId = 0;
-
-      function setMode(value) {
-        if (uploading) return;
-
-        mode = value;
-        managerMode.classList.toggle("active", mode === "manager");
-        userMode.classList.toggle("active", mode === "user");
-        tokenField.classList.toggle("hidden", mode !== "user");
-      }
-
-      managerMode.onclick = () => setMode("manager");
-      userMode.onclick = () => setMode("user");
 
       function updateButton() {
         const pending = files.filter(
@@ -332,7 +286,7 @@
           }
 
           if (file.size > MAX_SIZE) {
-            summary.textContent = `${file.name} exceeds 100 MB.`;
+            summary.textContent = `${file.name} exceeds 5 MB.`;
             summary.className = "summary error";
             continue;
           }
@@ -445,10 +399,9 @@
         const formData = new FormData();
         formData.append("data", item.file);
 
-        const headers = {};
-        if (token) {
-          headers.Authorization = `Bearer ${token}`;
-        }
+        const headers = {
+          Authorization: `Bearer ${token}`,
+        };
 
         try {
           const response = await fetch(endpoint, {
@@ -485,7 +438,7 @@
 
         const token = tokenInput.value.trim();
 
-        if (mode === "user" && !token) {
+        if (!token) {
           summary.textContent = "Please enter your JWT access token.";
           summary.className = "summary error";
           return;
@@ -497,13 +450,10 @@
 
         if (!pending.length) return;
 
-        const endpoint =
-          mode === "manager" ? "/api/photo/manager" : "/api/photo";
+        const endpoint = "/api/photo";
 
         uploading = true;
         fileInput.disabled = true;
-        managerMode.disabled = true;
-        userMode.disabled = true;
         summary.className = "summary";
         summary.textContent = `Uploading 0 of ${pending.length}...`;
         updateButton();
@@ -512,15 +462,13 @@
         // Sequential uploads keep things simple and avoid
         // overwhelming the server with many simultaneous requests.
         for (let i = 0; i < pending.length; i++) {
-          await uploadOne(pending[i], endpoint, mode === "user" ? token : null);
+          await uploadOne(pending[i], endpoint, token);
 
           summary.textContent = `Processed ${i + 1} of ${pending.length} photos.`;
         }
 
         uploading = false;
         fileInput.disabled = false;
-        managerMode.disabled = false;
-        userMode.disabled = false;
 
         const succeeded = pending.filter(
           (item) => item.status === "success",
