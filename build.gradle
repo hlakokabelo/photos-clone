@@ -24,6 +24,7 @@ dependencies {
     // Database - Neon PostgreSQL
     implementation 'org.springframework.boot:spring-boot-starter-data-jdbc'
     runtimeOnly 'org.postgresql:postgresql'
+    testRuntimeOnly 'com.h2database:h2'
 
     // Validation
     implementation 'org.springframework.boot:spring-boot-starter-validation'
