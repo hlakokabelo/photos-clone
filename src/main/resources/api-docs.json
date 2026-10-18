@@ -4,7 +4,10 @@
   "description": "A REST API for registering users, authenticating with JWT, and uploading, searching, viewing, downloading, and deleting photos.",
   "documentation": {
     "api": "/api",
-    "interactive": "/swagger-ui/index.html"
+    "interactive": {
+      "swagger-ui": "/swagger-ui/index.html",
+      "upload": "/../upload.html"
+    }
   },
   "security": {
     "type": "http",
