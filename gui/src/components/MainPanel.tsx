@@ -9,6 +9,31 @@ import { getToken, setToken } from "../lib/tokenStore.ts";
 import { listPhotos } from "../services/photoService.ts";
 import DownloadForm from "./DownloadForm.tsx";
 
+type PanelKey = "filter" | "upload" | "download" | "auth";
+
+/* --- shared toggle styles (secondary buttons) --- */
+const toggleBase =
+  "inline-flex cursor-pointer items-center gap-2 rounded-xl border px-3.5 py-2 text-sm font-medium shadow-sm transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-slate-900";
+
+const toggleIdle =
+  "border-slate-200 bg-white text-slate-700 hover:border-slate-300 hover:bg-slate-50 hover:text-slate-900 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200 dark:hover:border-slate-600 dark:hover:bg-slate-700 dark:hover:text-white";
+
+const toggleActive =
+  "border-indigo-500 bg-indigo-50 text-indigo-700 ring-2 ring-indigo-500/30 shadow-indigo-500/10 dark:border-indigo-400 dark:bg-indigo-950/60 dark:text-indigo-200 dark:ring-indigo-400/30";
+
+const toggleClass = (active: boolean) =>
+  `${toggleBase} ${active ? toggleActive : toggleIdle}`;
+
+/* --- upload is the primary CTA, so its "open" style is a brighter gradient + ring --- */
+const uploadBase =
+  "inline-flex cursor-pointer items-center gap-2 rounded-xl bg-linear-to-b px-3.5 py-2 text-sm font-semibold text-white shadow-sm transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-slate-900";
+
+const uploadIdle =
+  "from-indigo-500 to-indigo-600 shadow-indigo-600/25 hover:from-indigo-400 hover:to-indigo-500";
+
+const uploadActive =
+  "from-indigo-600 to-indigo-700 shadow-indigo-700/30 ring-2 ring-indigo-400/60 ring-offset-2 ring-offset-white hover:from-indigo-500 hover:to-indigo-600 dark:ring-offset-slate-900";
+
 const MainPanel = () => {
   const [token, setTokenState] = useState<string | null>(getToken());
   const [photos, setPhotos] = useState<PhotoResponse[]>([]);
@@ -20,12 +45,15 @@ const MainPanel = () => {
 
   const [loading, setLoading] = useState(false);
   const [downloading, setDownloading] = useState(false);
-  const [showUpload, setShowUpload] = useState(false);
-  const [showDownload, setShowDownload] = useState(false);
-  const [showFilterPhotos, setShowFilterPhotos] = useState(false);
-  const [showAuth, setShowAuth] = useState(false);
+  const [activePanel, setActivePanel] = useState<PanelKey | null>(null);
   const [error, setError] = useState("");
   const [openId, setOpenId] = useState<number | null>(null);
+
+  /* derived — guarantees only one panel is ever open */
+  const showUpload = activePanel === "upload";
+  const showDownload = activePanel === "download";
+  const showFilterPhotos = activePanel === "filter";
+  const showAuth = activePanel === "auth";
 
   const load = useCallback(async () => {
     setLoading(true);
@@ -40,10 +68,19 @@ const MainPanel = () => {
     }
   }, [filters]);
 
+  /** Open `panel`, or close it if it's already the active one. */
+  function handleSetShow(panel: PanelKey) {
+    setActivePanel((prev) => (prev === panel ? null : panel));
+  }
+
   function handleLogin(t: string) {
     setToken(t);
     setTokenState(t);
+    // close the auth panel once the user is logged in,
+    // otherwise it would reappear on the next logout
+    setActivePanel(null);
   }
+
   useEffect(() => {
     load();
   }, []);
@@ -53,6 +90,7 @@ const MainPanel = () => {
     setTokenState(null);
     setPhotos([]);
     setOpenId(null);
+    setActivePanel(null);
   }
 
   return (
@@ -62,7 +100,7 @@ const MainPanel = () => {
           type="button"
           onClick={load}
           disabled={loading}
-          className="inline-flex  cursor-pointer items-center gap-2 rounded-xl border border-slate-200 bg-white px-3.5 py-2 text-sm font-medium text-slate-700 shadow-sm transition hover:border-slate-300 hover:bg-slate-50 hover:text-slate-900 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200 dark:hover:border-slate-600 dark:hover:bg-slate-700 dark:hover:text-white dark:focus-visible:ring-offset-slate-900"
+          className="inline-flex cursor-pointer items-center gap-2 rounded-xl border border-slate-200 bg-white px-3.5 py-2 text-sm font-medium text-slate-700 shadow-sm transition hover:border-slate-300 hover:bg-slate-50 hover:text-slate-900 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200 dark:hover:border-slate-600 dark:hover:bg-slate-700 dark:hover:text-white dark:focus-visible:ring-offset-slate-900"
         >
           <span aria-hidden="true">↻</span>
           {loading ? "Fetching..." : "Fetch photos"}
@@ -70,16 +108,20 @@ const MainPanel = () => {
 
         <button
           type="button"
-          onClick={() => setShowFilterPhotos((prev) => !prev)}
-          className="inline-flex  cursor-pointer items-center gap-2 rounded-xl border border-slate-200 bg-white px-3.5 py-2 text-sm font-medium text-slate-700 shadow-sm transition hover:border-slate-300 hover:bg-slate-50 hover:text-slate-900 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-40 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200 dark:hover:border-slate-600 dark:hover:bg-slate-700 dark:hover:text-white dark:focus-visible:ring-offset-slate-900"
+          onClick={() => handleSetShow("filter")}
+          aria-expanded={showFilterPhotos}
+          aria-controls="filter-section"
+          className={toggleClass(showFilterPhotos)}
         >
           Filter Photos
         </button>
 
         <button
           type="button"
-          onClick={() => setShowUpload((prev) => !prev)}
-          className="inline-flex  cursor-pointer  items-center gap-2 rounded-xl bg-linear-to-b from-indigo-500 to-indigo-600 px-3.5 py-2 text-sm font-semibold text-white shadow-sm shadow-indigo-600/25 transition hover:from-indigo-400 hover:to-indigo-500 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-slate-900"
+          onClick={() => handleSetShow("upload")}
+          aria-expanded={showUpload}
+          aria-controls="upload-section"
+          className={`${uploadBase} ${showUpload ? uploadActive : uploadIdle}`}
         >
           <span aria-hidden="true">↑</span>
           Upload photo
@@ -87,8 +129,10 @@ const MainPanel = () => {
 
         <button
           type="button"
-          onClick={() => setShowDownload((prev) => !prev)}
-          className="inline-flex  cursor-pointer  items-center gap-2 rounded-xl border border-slate-200 bg-white px-3.5 py-2 text-sm font-medium text-slate-700 shadow-sm transition hover:border-slate-300 hover:bg-slate-50 hover:text-slate-900 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-40 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200 dark:hover:border-slate-600 dark:hover:bg-slate-700 dark:hover:text-white dark:focus-visible:ring-offset-slate-900"
+          onClick={() => handleSetShow("download")}
+          aria-expanded={showDownload}
+          aria-controls="download-section"
+          className={toggleClass(showDownload)}
         >
           <span aria-hidden="true">↓</span>
           {downloading ? "Downloading..." : "Download"}
@@ -98,15 +142,17 @@ const MainPanel = () => {
           <button
             type="button"
             onClick={logout}
-            className="inline-flex  cursor-pointer  items-center gap-2 rounded-xl border border-transparent bg-transparent px-3.5 py-2 text-sm font-medium text-slate-500 transition hover:border-rose-200 hover:bg-rose-50 hover:text-rose-600 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-rose-500 focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-40 dark:text-slate-400 dark:hover:border-rose-900/60 dark:hover:bg-rose-950/50 dark:hover:text-rose-300 dark:focus-visible:ring-offset-slate-900"
+            className="inline-flex cursor-pointer items-center gap-2 rounded-xl border border-transparent bg-transparent px-3.5 py-2 text-sm font-medium text-slate-500 transition hover:border-rose-200 hover:bg-rose-50 hover:text-rose-600 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-rose-500 focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-40 dark:text-slate-400 dark:hover:border-rose-900/60 dark:hover:bg-rose-950/50 dark:hover:text-rose-300 dark:focus-visible:ring-offset-slate-900"
           >
             Log out
           </button>
         ) : (
           <button
             type="button"
-            onClick={() => setShowAuth((prev) => !prev)}
-            className="inline-flex  cursor-pointer  items-center gap-2 rounded-xl border border-slate-200 bg-white px-3.5 py-2 text-sm font-medium text-slate-700 shadow-sm transition hover:border-slate-300 hover:bg-slate-50 hover:text-slate-900 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-40 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200 dark:hover:border-slate-600 dark:hover:bg-slate-700 dark:hover:text-white dark:focus-visible:ring-offset-slate-900"
+            onClick={() => handleSetShow("auth")}
+            aria-expanded={showAuth}
+            aria-controls="auth-section"
+            className={toggleClass(showAuth)}
           >
             Authenticate
           </button>
@@ -123,7 +169,7 @@ const MainPanel = () => {
       {showAuth && !token && (
         <section
           id="auth-section"
-          className="scroll-mt-24 rounded-2xl border  p-5 shadow-sm dark:border-slate-800 dark:bg-slate-900"
+          className="scroll-mt-24 rounded-2xl border border-slate-200 p-5 shadow-sm dark:border-slate-800 dark:bg-slate-900"
         >
           <AuthForm onLoggedIn={handleLogin} />
         </section>
@@ -139,7 +185,10 @@ const MainPanel = () => {
       )}
 
       {showDownload && (
-        <section className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm dark:border-slate-800 dark:bg-slate-900">
+        <section
+          id="download-section"
+          className="scroll-mt-24 rounded-2xl border border-slate-200 bg-white p-5 shadow-sm dark:border-slate-800 dark:bg-slate-900"
+        >
           <DownloadForm
             loading={downloading}
             setLoading={setDownloading}
@@ -165,7 +214,9 @@ const MainPanel = () => {
         </div>
 
         {showFilterPhotos && (
-          <PhotoFilters value={filters} onChange={setFilters} onSearch={load} />
+          <div id="filter-section" className="scroll-mt-24">
+            <PhotoFilters value={filters} onChange={setFilters} onSearch={load} />
+          </div>
         )}
 
         {error && (
