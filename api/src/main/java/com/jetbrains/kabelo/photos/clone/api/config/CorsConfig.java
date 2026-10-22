@@ -30,8 +30,7 @@ public class CorsConfig {
                                 "Origin"));
 
                 // Allow JavaScript to read the original download filename.
-                configuration.setExposedHeaders(
-                                List.of("Content-Disposition"));
+                config.setExposedHeaders(List.of("Content-Disposition"));
 
                 // GUI uses Bearer tokens, not cookie-based authentication.
                 config.setAllowCredentials(false);
