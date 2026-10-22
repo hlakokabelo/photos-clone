@@ -13,6 +13,10 @@ jobs:
     permissions:
       contents: read
 
+    defaults:
+      run:
+        working-directory: api
+
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4

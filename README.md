@@ -4,13 +4,12 @@ A REST API built with **Java 21 and Spring Boot 4** for uploading, managing, sea
 
 This project was developed to gain hands-on experience with Spring Boot, RESTful API development, Spring Security, JWT authentication, dependency injection, and database operations using PostgreSQL.
 
-## 🚀 Live API
+## 🚀 Live Projects
 
-**Base URL:** https://photos-clone-api.onrender.com
-
-**API Documentation:** [View API](https://photos-clone-api.onrender.com/api)
-
-**Swagger UI:** [Explore API](https://photos-clone-api.onrender.com/swagger-ui/index.html)
+- **Web Interface:** [Photos GUI](https://photos-clone-gui.vercel.app/)
+- **Base API URL:** [Photos Clone API](https://photos-clone-api.onrender.com)
+- **API Documentation:** [View API](https://photos-clone-api.onrender.com/api)
+- **Swagger UI:** [Explore API](https://photos-clone-api.onrender.com/swagger-ui/index.html)
 
 ## Table of Contents
 
@@ -18,7 +17,7 @@ This project was developed to gain hands-on experience with Spring Boot, RESTful
 - [Features](#features)
 - [API Endpoints](#api-endpoints)
   - [Filtering Photos](#filtering-photos)
-- [Web Interface](#web-interface)
+- [Web Interfaces](#web-interfaces)
 - [Getting Started](#getting-started)
 - [Running with Docker](#running-with-docker)
 - [Deployment](#deployment)
@@ -31,17 +30,18 @@ This project was developed to gain hands-on experience with Spring Boot, RESTful
 - **Backend:** Java 21, Spring Boot 4
 - **Database:** Neon PostgreSQL, Spring Data JDBC
 - **Security:** Spring Security, JWT, BCrypt
-- **API Documentation:** Springdoc OpenAPI (Swagger UI)
+- **API Documentation:** Springdoc OpenAPI, Swagger UI
 - **Build Tool:** Gradle
 - **Containerization:** Docker
 - **CI/CD:** GitHub Actions
-- **Frontend:** HTML, CSS, JavaScript (upload interface)
+- **Frontend:** React, TypeScript, Vite, Tailwind CSS
+- **Additional Upload Interface:** HTML, CSS, JavaScript
 
 ## Features
 
 - User registration and login with JWT authentication
 - Secure password hashing using BCrypt
-- Upload images up to 5 MB with file type validation
+- Image uploads up to 5 MB with file type validation
 - Upload multiple photos through a browser interface
 - Associate uploaded photos with user accounts
 - Retrieve individual photos or list all photos
@@ -52,6 +52,7 @@ This project was developed to gain hands-on experience with Spring Boot, RESTful
 - File validation and custom HTTP error responses
 - Persistent cloud database storage using Neon PostgreSQL
 - Interactive API documentation with Swagger UI
+- React-based web interface for interacting with the API
 
 ## API Endpoints
 
@@ -66,7 +67,7 @@ This project was developed to gain hands-on experience with Spring Boot, RESTful
 | DELETE | `/api/photo/{id}`    | Delete a photo (JWT required)         |
 | GET    | `/api/download/{id}` | Download a photo                      |
 
-### Filtering Photos
+## Filtering Photos
 
 The `/api/photos` endpoint supports optional query parameters:
 
@@ -82,15 +83,23 @@ Example:
 GET /api/photos?fileName=holiday&contentType=image&limit=10
 ```
 
-## Web Interface
+## Web Interfaces
 
-A lightweight browser interface is available for uploading photos individually or in batches.
+### React Web Interface
 
-- **Upload Interface:** [Open Upload Page](https://photos-clone-api.onrender.com/upload.html)
-- **Swagger UI:** [Explore API](https://photos-clone-api.onrender.com/swagger-ui/index.html)
-- **API Documentation:** [View JSON](https://photos-clone-api.onrender.com/api)
+The React frontend provides a browser-based interface for interacting with the Photos Clone API, including browsing, filtering, retrieving, uploading, and downloading photos.
 
-The upload interface sends a separate API request for each selected image and displays individual upload results.
+- **[Open Photos Explorer](https://photos-clone-gui.vercel.app/)**
+
+### HTML Upload Interface
+
+A lightweight upload interface is also available for uploading photos individually or in batches.
+
+- **[Open Upload Page](https://photos-clone-api.onrender.com/upload.html)**
+- **[Explore Swagger UI](https://photos-clone-api.onrender.com/swagger-ui/index.html)**
+- **[View API Documentation](https://photos-clone-api.onrender.com/api)**
+
+The HTML upload interface sends a separate API request for each selected image and displays individual upload results.
 
 ## Getting Started
 
@@ -138,7 +147,7 @@ spring.sql.init.mode=always
 
 ### 3. Run the application
 
-**Windows:**
+**Windows (PowerShell):**
 
 ```powershell
 .\gradlew.bat bootRun
@@ -154,13 +163,11 @@ Ensure the environment variables are available to the process before running the
 
 When using VS Code, the application can also be launched using the Java debugger with `envFile` configured in `.vscode/launch.json`.
 
-The application will be available at:
+The API will be available at:
 
-http://localhost:8080
+[http://localhost:8080](http://localhost:8080)
 
 ## Running with Docker
-
-The application can be packaged and run inside a Docker container.
 
 Build the Docker image:
 
@@ -184,9 +191,7 @@ Ensure `.env` is also excluded from the Docker build context through `.dockerign
 
 The API is deployed on Render using Docker.
 
-The application is built from the repository's Dockerfile and connects to a Neon-hosted PostgreSQL database.
-
-Environment variables are configured securely in Render.
+The application is built from the repository's Dockerfile and connects to a Neon-hosted PostgreSQL database. Environment variables are configured securely in Render.
 
 ## Database
 

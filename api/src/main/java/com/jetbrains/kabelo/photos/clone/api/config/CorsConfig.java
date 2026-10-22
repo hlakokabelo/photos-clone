@@ -10,37 +10,37 @@ import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 @Configuration
 public class CorsConfig {
 
-    @Bean
-    public UrlBasedCorsConfigurationSource corsConfigurationSource() {
-        CorsConfiguration config = new CorsConfiguration();
+        @Bean
+        public UrlBasedCorsConfigurationSource corsConfigurationSource() {
+                CorsConfiguration config = new CorsConfiguration();
 
-        config.setAllowedOrigins(List.of(
-            "http://localhost:5173",
-            "http://127.0.0.1:5173",
-            "https://YOUR-GUI.vercel.app"
-        ));
+                config.setAllowedOrigins(List.of(
+                                "http://localhost:5173",
+                                "http://127.0.0.1:5173",
+                                "https://photos-clone-gui.vercel.app"));
 
-        config.setAllowedMethods(List.of(
-            "GET", "POST", "PUT", "PATCH",
-            "DELETE", "OPTIONS"
-        ));
+                config.setAllowedMethods(List.of(
+                                "GET", "POST", "PUT", "PATCH",
+                                "DELETE", "OPTIONS"));
 
-        config.setAllowedHeaders(List.of(
-            "Authorization",
-            "Content-Type",
-            "Accept",
-            "Origin"
-        ));
+                config.setAllowedHeaders(List.of(
+                                "Authorization",
+                                "Content-Type",
+                                "Accept",
+                                "Origin"));
 
-        // Your GUI uses Bearer tokens, not cookie-based authentication.
-        config.setAllowCredentials(false);
-        config.setMaxAge(3600L);
+                // Allow JavaScript to read the original download filename.
+                configuration.setExposedHeaders(
+                                List.of("Content-Disposition"));
 
-        UrlBasedCorsConfigurationSource source =
-            new UrlBasedCorsConfigurationSource();
+                // GUI uses Bearer tokens, not cookie-based authentication.
+                config.setAllowCredentials(false);
+                config.setMaxAge(3600L);
 
-        source.registerCorsConfiguration("/**", config);
+                UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
 
-        return source;
-    }
+                source.registerCorsConfiguration("/**", config);
+
+                return source;
+        }
 }

@@ -6,7 +6,8 @@
     "api": "/api",
     "interactive": {
       "swagger-ui": "/swagger-ui/index.html",
-      "upload": "/../upload.html"
+      "upload": "/../upload.html",
+      "GUI": "https://photos-clone-gui.vercel.app/"
     }
   },
   "security": {
@@ -19,6 +20,18 @@
     "description": "Obtain an access token by logging in. Send it in the Authorization header on endpoints marked auth: true."
   },
   "endpoints": [
+    {
+      "method": "GET",
+      "path": "/api/ping",
+      "summary": "Check API availability",
+      "description": "Returns a simple text response to confirm that the API is running and responding to requests.",
+      "auth": false,
+      "pathParameters": {},
+      "example": "/api/ping",
+      "responses": {
+        "200": "OK — plain text response: \"I'm awake\""
+      }
+    },
     {
       "method": "POST",
       "path": "/api/auth/register",
