@@ -60,7 +60,8 @@ public class SecurityConfig {
         @Bean
         SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
 
-                return http
+                return http // Enable CORS using CorsConfigurationSource
+                                .cors(Customizer.withDefaults())
                                 // Disable CSRF protection since we're using JWTs
                                 // sent through Authorization headers instead of cookies
                                 .csrf(csrf -> csrf.disable())
