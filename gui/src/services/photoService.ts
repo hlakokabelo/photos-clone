@@ -1,11 +1,31 @@
 import type { Photo, PhotoFilters, PhotoResponse } from "../types/photo.ts";
-import { request } from "./apiClient";
+import { getApiUrl, request } from "./apiClient";
 
-export function uploadPhoto(data: string) {
-  return request<Photo>("/api/photo", {
+import { getToken } from "../lib/tokenStore";
+
+export async function uploadPhoto(file: File): Promise<Photo> {
+  const headers = new Headers();
+  const token = getToken();
+
+  if (token) {
+    headers.set("Authorization", `Bearer ${token}`);
+  }
+
+  const formData = new FormData();
+  formData.append("data", file);
+
+  const response = await fetch(getApiUrl("/api/photo"), {
     method: "POST",
-    body: JSON.stringify({ data }),
+    headers,
+    body: formData,
   });
+
+  if (!response.ok) {
+    const message = await response.text().catch(() => "");
+    throw new Error(message || `Upload failed (${response.status})`);
+  }
+
+  return response.json() as Promise<Photo>;
 }
 
 export async function listPhotos(

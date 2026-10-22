@@ -1,4 +1,4 @@
-import { useCallback, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import type { PhotoFilters as Filters, PhotoResponse } from "../types/photo.ts";
 import AuthForm from "./AuthForm.tsx";
 import UploadForm from "./UploadForm.tsx";
@@ -22,6 +22,7 @@ const MainPanel = () => {
   const [downloading, setDownloading] = useState(false);
   const [showUpload, setShowUpload] = useState(false);
   const [showDownload, setShowDownload] = useState(false);
+  const [showFilterPhotos, setShowFilterPhotos] = useState(false);
   const [showAuth, setShowAuth] = useState(false);
   const [error, setError] = useState("");
   const [openId, setOpenId] = useState<number | null>(null);
@@ -43,6 +44,9 @@ const MainPanel = () => {
     setToken(t);
     setTokenState(t);
   }
+  useEffect(() => {
+    load();
+  }, []);
 
   function logout() {
     setToken(null);
@@ -58,7 +62,7 @@ const MainPanel = () => {
           type="button"
           onClick={load}
           disabled={loading}
-          className="inline-flex items-center gap-2 rounded-xl border border-slate-200 bg-white px-3.5 py-2 text-sm font-medium text-slate-700 shadow-sm transition hover:border-slate-300 hover:bg-slate-50 hover:text-slate-900 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200 dark:hover:border-slate-600 dark:hover:bg-slate-700 dark:hover:text-white dark:focus-visible:ring-offset-slate-900"
+          className="inline-flex  cursor-pointer items-center gap-2 rounded-xl border border-slate-200 bg-white px-3.5 py-2 text-sm font-medium text-slate-700 shadow-sm transition hover:border-slate-300 hover:bg-slate-50 hover:text-slate-900 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200 dark:hover:border-slate-600 dark:hover:bg-slate-700 dark:hover:text-white dark:focus-visible:ring-offset-slate-900"
         >
           <span aria-hidden="true">↻</span>
           {loading ? "Fetching..." : "Fetch photos"}
@@ -66,8 +70,16 @@ const MainPanel = () => {
 
         <button
           type="button"
+          onClick={() => setShowFilterPhotos((prev) => !prev)}
+          className="inline-flex  cursor-pointer items-center gap-2 rounded-xl border border-slate-200 bg-white px-3.5 py-2 text-sm font-medium text-slate-700 shadow-sm transition hover:border-slate-300 hover:bg-slate-50 hover:text-slate-900 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-40 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200 dark:hover:border-slate-600 dark:hover:bg-slate-700 dark:hover:text-white dark:focus-visible:ring-offset-slate-900"
+        >
+          Filter Photos
+        </button>
+
+        <button
+          type="button"
           onClick={() => setShowUpload((prev) => !prev)}
-          className="inline-flex items-center gap-2 rounded-xl bg-linear-to-b from-indigo-500 to-indigo-600 px-3.5 py-2 text-sm font-semibold text-white shadow-sm shadow-indigo-600/25 transition hover:from-indigo-400 hover:to-indigo-500 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-slate-900"
+          className="inline-flex  cursor-pointer  items-center gap-2 rounded-xl bg-linear-to-b from-indigo-500 to-indigo-600 px-3.5 py-2 text-sm font-semibold text-white shadow-sm shadow-indigo-600/25 transition hover:from-indigo-400 hover:to-indigo-500 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-slate-900"
         >
           <span aria-hidden="true">↑</span>
           Upload photo
@@ -76,16 +88,17 @@ const MainPanel = () => {
         <button
           type="button"
           onClick={() => setShowDownload((prev) => !prev)}
-          className="inline-flex items-center gap-2 rounded-xl border border-slate-200 bg-white px-3.5 py-2 text-sm font-medium text-slate-700 shadow-sm transition hover:border-slate-300 hover:bg-slate-50 hover:text-slate-900 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-40 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200 dark:hover:border-slate-600 dark:hover:bg-slate-700 dark:hover:text-white dark:focus-visible:ring-offset-slate-900"
+          className="inline-flex  cursor-pointer  items-center gap-2 rounded-xl border border-slate-200 bg-white px-3.5 py-2 text-sm font-medium text-slate-700 shadow-sm transition hover:border-slate-300 hover:bg-slate-50 hover:text-slate-900 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-40 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200 dark:hover:border-slate-600 dark:hover:bg-slate-700 dark:hover:text-white dark:focus-visible:ring-offset-slate-900"
         >
           <span aria-hidden="true">↓</span>
           {downloading ? "Downloading..." : "Download"}
         </button>
+
         {token ? (
           <button
             type="button"
             onClick={logout}
-            className="inline-flex items-center gap-2 rounded-xl border border-transparent bg-transparent px-3.5 py-2 text-sm font-medium text-slate-500 transition hover:border-rose-200 hover:bg-rose-50 hover:text-rose-600 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-rose-500 focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-40 dark:text-slate-400 dark:hover:border-rose-900/60 dark:hover:bg-rose-950/50 dark:hover:text-rose-300 dark:focus-visible:ring-offset-slate-900"
+            className="inline-flex  cursor-pointer  items-center gap-2 rounded-xl border border-transparent bg-transparent px-3.5 py-2 text-sm font-medium text-slate-500 transition hover:border-rose-200 hover:bg-rose-50 hover:text-rose-600 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-rose-500 focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-40 dark:text-slate-400 dark:hover:border-rose-900/60 dark:hover:bg-rose-950/50 dark:hover:text-rose-300 dark:focus-visible:ring-offset-slate-900"
           >
             Log out
           </button>
@@ -93,11 +106,12 @@ const MainPanel = () => {
           <button
             type="button"
             onClick={() => setShowAuth((prev) => !prev)}
-            className="inline-flex items-center gap-2 rounded-xl border border-slate-200 bg-white px-3.5 py-2 text-sm font-medium text-slate-700 shadow-sm transition hover:border-slate-300 hover:bg-slate-50 hover:text-slate-900 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-40 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200 dark:hover:border-slate-600 dark:hover:bg-slate-700 dark:hover:text-white dark:focus-visible:ring-offset-slate-900"
+            className="inline-flex  cursor-pointer  items-center gap-2 rounded-xl border border-slate-200 bg-white px-3.5 py-2 text-sm font-medium text-slate-700 shadow-sm transition hover:border-slate-300 hover:bg-slate-50 hover:text-slate-900 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-40 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200 dark:hover:border-slate-600 dark:hover:bg-slate-700 dark:hover:text-white dark:focus-visible:ring-offset-slate-900"
           >
             Authenticate
           </button>
         )}
+
         <a
           href="https://photos-clone-api.onrender.com/api"
           className="inline-flex items-center gap-2 rounded-xl border border-slate-200 bg-white px-3.5 py-2 text-sm font-medium text-slate-700 shadow-sm transition hover:border-slate-300 hover:bg-slate-50 hover:text-slate-900 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-40 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200 dark:hover:border-slate-600 dark:hover:bg-slate-700 dark:hover:text-white dark:focus-visible:ring-offset-slate-900"
@@ -150,7 +164,9 @@ const MainPanel = () => {
           </span>
         </div>
 
-        <PhotoFilters value={filters} onChange={setFilters} onSearch={load} />
+        {showFilterPhotos && (
+          <PhotoFilters value={filters} onChange={setFilters} onSearch={load} />
+        )}
 
         {error && (
           <p
