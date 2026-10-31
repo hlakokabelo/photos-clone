@@ -22,9 +22,15 @@ export default function ApiWakeScreen() {
       </h1>
 
       <p className="mt-2 max-w-sm text-sm text-gray-600 dark:text-gray-400">
-        {error
-          ? "The server isn't responding. Check your connection and try again."
-          : "Please wait while we get everything ready for you."}
+        {error ? (
+          "The server isn't responding. Please check your connection and try again."
+        ) : (
+          <>
+            Please wait while the <strong>server wakes up</strong>.
+            <br />
+            This usually takes around 60–70 seconds.
+          </>
+        )}
       </p>
 
       {error && (
